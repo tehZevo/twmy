@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>TWMY</title>
+    <!--link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"-->
+    <link rel="stylesheet" href="https://bootswatch.com/4/darkly/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Today - Week - Month - Year</h1>
+      <div class="row">
+        <div class="col-sm-1">
+          <button type="button" id="download-button" class="btn btn-secondary">Download</button>
+        </div>
+        <div class="col-sm-8 offset-sm-1">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Open</span>
+            </div>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="file-input">
+              <label class="custom-file-label" for="file-input">Choose file</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr/>
+
+      <h4>Add</h4>
+      <div class="row">
+        <div class="col-sm-5">
+          <input type="text" class="form-control" id="todo-name" placeholder="Todo name">
+        </div>
+        <div class="col-sm-6">
+          <button id="add-now" type="button" class="btn btn-outline-danger">Now!</button>
+          <button id="add-today" type="button" class="btn btn-outline-danger">Today</button>
+          <button id="add-week" type="button" class="btn btn-outline-warning">This week</button>
+          <button id="add-month" type="button" class="btn btn-outline-success">This month</button>
+          <button id="add-year" type="button" class="btn btn-outline-primary">This year</button>
+        </div>
+      </div>
+
+      <hr/>
+
+      <h4>Reschedule</h4>
+      <div id="todos" class="row">
+      </div>
+
+    </div>
+
+    <script>
+    var day = 1000 * 60 * 60 * 24
+    var week = day * 7
+    var month = day * 30
+    var year = day * 365
+
+    var updateFuncs = [];
+
+    $("#add-now").click(() => addButtonOnClick(0));
+    $("#add-today").click(() => addButtonOnClick(day));
+    $("#add-week").click(() => addButtonOnClick(week));
+    $("#add-month").click(() => addButtonOnClick(month));
+    $("#add-year").click(() => addButtonOnClick(year));
+
+    function addButtonOnClick(dTime)
+    {
+      var todoField = $("#todo-name");
+
+      var todoName = todoField.val().trim();
+      if(todoName == "")
+      {
+        return;
+      }
+
+      todoField.val("");
+      console.log(todoName)
+
+      addTodo(todoName, Date.now() + dTime);
+    }
+
+    function timeButton(todo, text, dTime, clazz="primary")
+    {
+      var button = $("<button/>",
+      {
+        type: "button",
+        "class": `btn btn-outline-${clazz}`,
+        text: text,
+        click: () => changeTodoTime(todo, dTime)
+      });
+
+      return button;
+    }
+
+    function wrapCol(size, e)
+    {
+      var parent = $(`<div class="col-sm-${size}"/>`);
+      parent.append(e);
+
+      return parent;
+    }
+
+    function buildDiv(todo)
+    {
+      var col = $(`<div class="col-sm-12"/>`);
+      var row = $('<div class="row">');
+      col.append(row);
+
+      var nameLabel = $("<span></span>");
+      nameLabel.text(todo.name);
+
+      var timeLabel = $("<span></span>");
+      //timeLabel.addClass("text-secondary");
+      timeLabel.text(formatTime(todo.time));
+
+      //var doneButton = $('<button/>',
+      var nowButton = timeButton(todo, "Now!", 0, "danger");
+      var dayButton = timeButton(todo, "Today", day, "danger");
+      var weekButton = timeButton(todo, "This week", week, "warning");
+      var monthButton = timeButton(todo, "This Month", month, "success");
+      var yearButton = timeButton(todo, "This Year", year, "primary");
+
+      row.append(wrapCol(3, nameLabel))
+      row.append(wrapCol(2, timeLabel))
+
+      var col2 = $(`<div class="col-sm-6"/>`);
+      // row.append(wrapCol(1, dayButton))
+      // row.append(wrapCol(1, weekButton))
+      // row.append(wrapCol(1, monthButton))
+      // row.append(wrapCol(1, yearButton))
+      col2.append(nowButton)
+      col2.append(dayButton)
+      col2.append(weekButton)
+      col2.append(monthButton)
+      col2.append(yearButton)
+
+      function updateFunc()
+      {
+        timeLabel.text(formatTime(todo.time));
+      }
+
+      var doneButton = $('<button/>',
+      {
+        type: "button",
+        "class": "btn btn-secondary",
+        text: "Remove",
+        click: function () { removeTodo(todo) }
+      });
+
+      col2.append(doneButton)
+      row.append(col2)
+
+      $("#todos").append(col);
+
+      return updateFunc;
+    }
+
+    //300 IQ /s
+    function updateAllTimes()
+    {
+      for(var func of updateFuncs)
+      {
+        func();
+      }
+    }
+
+    function addTodo(name, time, desc="")
+    {
+      db.push({name, desc, time});
+
+      save();
+      rebuildDivs();
+    }
+
+    function changeTodoTime(todo, dTime)
+    {
+      todo.time = Date.now() + dTime;
+
+      save();
+      rebuildDivs();
+    }
+
+    function removeTodo(todo)
+    {
+      //not exactly elegant but it should work
+      db = db.filter((e) => !(e.name == todo.name && e.time == todo.time && e.desc == todo.desc))
+
+      save();
+      rebuildDivs();
+    }
+
+    function dtime2dhms(dTime)
+    {
+      var seconds = Math.floor(dTime/1000);
+      var minutes = Math.floor(seconds/60);
+      var hours = Math.floor(minutes/60);
+      var days = Math.floor(hours/24);
+
+      hours = hours-(days*24);
+      minutes = minutes-(days*24*60)-(hours*60);
+      seconds = seconds-(days*24*60*60)-(hours*60*60)-(minutes*60);
+
+      return [days, hours, minutes, seconds];
+    }
+
+    function formatTime(todoTime)
+    {
+      var dTime = todoTime - Date.now();
+      var overdue = dTime < 0;
+      dTime = overdue ? dTime * -1 : dTime;
+
+      var dhms = dtime2dhms(dTime);
+
+      var str = overdue ? "Overdue! - " : "";
+      str += dhms[0] > 0 ? dhms[0] + "d" : "";
+      str += dhms[1] > 0 ? dhms[1] + "h" : "";
+      str += dhms[2] > 0 ? dhms[2] + "m" : "";
+      str += dhms[3] > 0 ? dhms[3] + "s" : "";
+
+      return str;
+    }
+
+    function rebuildDivs()
+    {
+      $("#todos").empty(); //ouch
+      updateFuncs = [];
+
+      for(var todo of db)
+      {
+        var func = buildDiv(todo);
+        updateFuncs.push(func);
+      }
+
+      updateAllTimes();
+    }
+
+    function save()
+    {
+      db.sort((a, b) => a.time - b.time);
+
+      localStorage.setItem("twmy", JSON.stringify(db));
+    }
+
+    function downloadJSON()
+    {
+      var uriContent = "data:application/json," + encodeURIComponent(JSON.stringify(db, null, 2));
+
+      var link = document.createElement("a");
+      link.download = "twmy-" + Date.now();
+      link.href = uriContent;
+      link.click();
+    }
+
+    function readURL(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          console.log(e.target.result)
+          db = JSON.parse(e.target.result);
+          save();
+          rebuildDivs();
+        };
+        reader.readAsText(input.files[0]);
+      }
+    }
+
+    $("#download-button").click(downloadJSON);
+
+    function handleFiles()
+    {
+      readURL(this)
+    }
+
+    $("#file-input").change(handleFiles);
+
+    var db = localStorage.getItem("twmy") || "[]"
+    db = JSON.parse(db);
+    db.sort((a, b) => a.time - b.time)
+    console.log(db);
+
+    //addTodo("foo", Date.now());
+    rebuildDivs();
+
+    setInterval(updateAllTimes, 1000);
+
+    </script>
+  </body>
+</html>
