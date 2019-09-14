@@ -2,6 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TWMY</title>
     <!--link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"-->
     <link rel="stylesheet" href="https://bootswatch.com/4/darkly/bootstrap.min.css">
@@ -11,12 +12,17 @@
   </head>
   <body>
     <div class="container">
-      <h1>Today - Week - Month - Year</h1>
       <div class="row">
-        <div class="col-sm-1">
-          <button type="button" id="download-button" class="btn btn-secondary">Download</button>
+        <div class="col-sm-12 mt-2">
+          <center><h4>Today - Week - Month - Year</h4></center>
         </div>
-        <div class="col-sm-8 offset-sm-1">
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6 mb-3">
+          <button type="button" id="download-button" class="btn btn-block btn-secondary">Download</button>
+        </div>
+        <div class="col-sm-6">
           <div class="input-group">
             <div class="input-group-prepend">
               <span class="input-group-text">Open</span>
@@ -37,11 +43,11 @@
           <input type="text" class="form-control" id="todo-name" placeholder="Todo name">
         </div>
         <div class="col-sm-6">
-          <button id="add-now" type="button" class="btn btn-outline-danger">Now!</button>
-          <button id="add-today" type="button" class="btn btn-outline-danger">Today</button>
-          <button id="add-week" type="button" class="btn btn-outline-warning">This week</button>
-          <button id="add-month" type="button" class="btn btn-outline-success">This month</button>
-          <button id="add-year" type="button" class="btn btn-outline-primary">This year</button>
+          <!--button id="add-now" type="button" class="btn btn-outline-danger">N!</button-->
+          <button id="add-today" type="button" class="btn btn-outline-danger">T</button>
+          <button id="add-week" type="button" class="btn btn-outline-warning">W</button>
+          <button id="add-month" type="button" class="btn btn-outline-success">M</button>
+          <button id="add-year" type="button" class="btn btn-outline-primary">Y</button>
         </div>
       </div>
 
@@ -61,7 +67,7 @@
 
     var updateFuncs = [];
 
-    $("#add-now").click(() => addButtonOnClick(0));
+    //$("#add-now").click(() => addButtonOnClick(0));
     $("#add-today").click(() => addButtonOnClick(day));
     $("#add-week").click(() => addButtonOnClick(week));
     $("#add-month").click(() => addButtonOnClick(month));
@@ -114,25 +120,25 @@
       nameLabel.text(todo.name);
 
       var timeLabel = $("<span></span>");
-      //timeLabel.addClass("text-secondary");
+      timeLabel.addClass("text-light");
       timeLabel.text(formatTime(todo.time));
 
       //var doneButton = $('<button/>',
-      var nowButton = timeButton(todo, "Now!", 0, "danger");
-      var dayButton = timeButton(todo, "Today", day, "danger");
-      var weekButton = timeButton(todo, "This week", week, "warning");
-      var monthButton = timeButton(todo, "This Month", month, "success");
-      var yearButton = timeButton(todo, "This Year", year, "primary");
+      //var nowButton = timeButton(todo, "N!", 0, "danger");
+      var dayButton = timeButton(todo, "T", day, "danger");
+      var weekButton = timeButton(todo, "W", week, "warning");
+      var monthButton = timeButton(todo, "M", month, "success");
+      var yearButton = timeButton(todo, "Y", year, "primary");
 
       row.append(wrapCol(3, nameLabel))
       row.append(wrapCol(2, timeLabel))
 
-      var col2 = $(`<div class="col-sm-6"/>`);
+      var col2 = $(`<div class="col-sm-6 mb-3"/>`);
       // row.append(wrapCol(1, dayButton))
       // row.append(wrapCol(1, weekButton))
       // row.append(wrapCol(1, monthButton))
       // row.append(wrapCol(1, yearButton))
-      col2.append(nowButton)
+      //col2.append(nowButton)
       col2.append(dayButton)
       col2.append(weekButton)
       col2.append(monthButton)
@@ -148,7 +154,7 @@
         type: "button",
         "class": "btn btn-secondary",
         text: "Remove",
-        click: function () { removeTodo(todo) }
+        click: function () { if(confirm(`Are you sure you want to remove '${todo.name}'?`)) { removeTodo(todo) } }
       });
 
       col2.append(doneButton)
