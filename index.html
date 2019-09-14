@@ -57,6 +57,23 @@
       <div id="todos" class="row">
       </div>
 
+      <hr/>
+
+      <h4>What is this?</h4>
+      I needed an organizational tool that was more than a <em>todo list</em>,
+      but not quite a <em>calendar</em>; so I made this.
+      It stores a list of tasks with simple due dates: finish within 24h (Today),
+      finish within 7 days (Week), finish within 30 days (Month),
+      and finish within 365 days (Year).
+      <br/><br/>
+      Once tasks count down to 0, they become "overdue".  Tasks can be rescheduled
+      at any time, clicking T/W/M/Y under reschedule will simply set their due date
+      to one day/week/month/year from now. This should work well for repeating tasks
+      like "Get groceries".
+      <br/><br/>
+      No todo data is sent or received from the server. Data is stored in <code>localStorage</code>, and supports saving and loading to/from JSON.
+
+
     </div>
 
     <script>
