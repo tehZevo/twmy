@@ -43,7 +43,7 @@
           <input type="text" class="form-control" id="todo-name" placeholder="Todo name">
         </div>
         <div class="col-sm-6">
-          <!--button id="add-now" type="button" class="btn btn-outline-danger">N!</button-->
+          <button id="add-now" type="button" class="btn btn-outline-danger">Now!</button>
           <button id="add-today" type="button" class="btn btn-outline-danger">T</button>
           <button id="add-week" type="button" class="btn btn-outline-warning">W</button>
           <button id="add-month" type="button" class="btn btn-outline-success">M</button>
@@ -141,7 +141,7 @@
       timeLabel.text(formatTime(todo.time));
 
       //var doneButton = $('<button/>',
-      //var nowButton = timeButton(todo, "N!", 0, "danger");
+      var nowButton = timeButton(todo, "Now!", 0, "danger");
       var dayButton = timeButton(todo, "T", day, "danger");
       var weekButton = timeButton(todo, "W", week, "warning");
       var monthButton = timeButton(todo, "M", month, "success");
@@ -155,7 +155,7 @@
       // row.append(wrapCol(1, weekButton))
       // row.append(wrapCol(1, monthButton))
       // row.append(wrapCol(1, yearButton))
-      //col2.append(nowButton)
+      col2.append(nowButton)
       col2.append(dayButton)
       col2.append(weekButton)
       col2.append(monthButton)
@@ -242,7 +242,8 @@
       str += dhms[0] > 0 ? dhms[0] + "d" : "";
       str += dhms[1] > 0 ? dhms[1] + "h" : "";
       str += dhms[2] > 0 ? dhms[2] + "m" : "";
-      str += dhms[3] > 0 ? dhms[3] + "s" : "";
+      //str += dhms[3] > 0 ? dhms[3] + "s" : "";
+      str += dhms[3] + "s";
 
       return str;
     }
