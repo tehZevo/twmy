@@ -19,19 +19,23 @@
       </div>
 
       <div class="row">
-        <div class="col-sm-6 mb-3">
-          <button type="button" id="download-button" class="btn btn-block btn-secondary">Download</button>
+        <div class="col-sm-4 mb-3">
+          <button type="button" id="download-button" class="btn btn-block btn-primary">Download JSON</button>
         </div>
-        <div class="col-sm-6">
+        <div class="col-lg-4 mb-3">
           <div class="input-group">
             <div class="input-group-prepend">
-              <span class="input-group-text">Open</span>
+              <button id="open-button" class="btn btn-primary">Open</button>
+              <button id="merge-button" class="btn btn-primary">Merge</button>
             </div>
             <div class="custom-file">
               <input type="file" class="custom-file-input" id="file-input">
-              <label class="custom-file-label" for="file-input">Choose file</label>
+              <label id="file-label" class="custom-file-label" for="file-input">Choose file</label>
             </div>
           </div>
+        </div>
+        <div class="col-sm-2">
+          <button id="clear-button" class="btn btn-block btn-danger">Clear</button>
         </div>
       </div>
 
@@ -83,12 +87,6 @@
     var year = day * 365
 
     var updateFuncs = [];
-
-    //$("#add-now").click(() => addButtonOnClick(0));
-    $("#add-today").click(() => addButtonOnClick(day));
-    $("#add-week").click(() => addButtonOnClick(week));
-    $("#add-month").click(() => addButtonOnClick(month));
-    $("#add-year").click(() => addButtonOnClick(year));
 
     function addButtonOnClick(dTime)
     {
@@ -151,10 +149,6 @@
       row.append(wrapCol(2, timeLabel))
 
       var col2 = $(`<div class="col-sm-6 mb-3"/>`);
-      // row.append(wrapCol(1, dayButton))
-      // row.append(wrapCol(1, weekButton))
-      // row.append(wrapCol(1, monthButton))
-      // row.append(wrapCol(1, yearButton))
       col2.append(nowButton)
       col2.append(dayButton)
       col2.append(weekButton)
@@ -195,25 +189,22 @@
     {
       db.push({name, desc, time});
 
-      save();
-      rebuildDivs();
+      update();
     }
 
     function changeTodoTime(todo, dTime)
     {
       todo.time = Date.now() + dTime;
 
-      save();
-      rebuildDivs();
+      update();
     }
 
     function removeTodo(todo)
     {
       //not exactly elegant but it should work
-      db = db.filter((e) => !(e.name == todo.name && e.time == todo.time && e.desc == todo.desc))
+      db = db.filter((e) => !(e.name == todo.name && e.time == todo.time))
 
-      save();
-      rebuildDivs();
+      update();
     }
 
     function dtime2dhms(dTime)
@@ -262,13 +253,6 @@
       updateAllTimes();
     }
 
-    function save()
-    {
-      db.sort((a, b) => a.time - b.time);
-
-      localStorage.setItem("twmy", JSON.stringify(db));
-    }
-
     function downloadJSON()
     {
       var uriContent = "data:application/json," + encodeURIComponent(JSON.stringify(db, null, 2));
@@ -279,35 +263,101 @@
       link.click();
     }
 
-    function readURL(input) {
-      if (input.files && input.files[0]) {
+    function openFile(merge=false)
+    {
+      var input = $("#file-input").get(0);
+
+      if(input.files && input.files[0])
+      {
+        if(!merge && !confirm(`Load '${input.files[0].name}'?\nThis will replace all your todos with the ones contained in the file.`))
+        {
+          return;
+        }
+        if(merge && !confirm(`Load '${input.files[0].name}'?\nThis will merge all todos in the file into the current list.`))
+        {
+          return;
+        }
+
         var reader = new FileReader();
-        reader.onload = function (e) {
-          console.log(e.target.result)
-          db = JSON.parse(e.target.result);
-          save();
-          rebuildDivs();
+        reader.onload = function(e)
+        {
+          var todos = JSON.parse(e.target.result);
+
+          if(merge) { mergeTodos(todos); }
+          else { loadTodos(todos); }
+
+          $("#file-label").text("Choose file");
+          $("#file-input").val(null);
         };
         reader.readAsText(input.files[0]);
       }
+      else
+      {
+        alert("Please choose a file");
+      }
     }
+
+    function loadTodos(todos)
+    {
+      db = todos;
+      update();
+    }
+
+    function mergeTodos(todos)
+    {
+      //remove all already in db
+      todos = todos.filter((a) =>
+      {
+        for(var b of db)
+        {
+          if(a.name == b.name && a.time == b.time)
+          {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      db = db.concat(todos);
+      update();
+    }
+
+    function clearTodos()
+    {
+      db = [];
+      update();
+    }
+
+    function update()
+    {
+      //sort
+      db.sort((a, b) => a.time - b.time);
+      //save
+      localStorage.setItem("twmy", JSON.stringify(db));
+      //rebuild divs
+      rebuildDivs();
+    }
+
+    $("#add-now").click(() => addButtonOnClick(0));
+    $("#add-today").click(() => addButtonOnClick(day));
+    $("#add-week").click(() => addButtonOnClick(week));
+    $("#add-month").click(() => addButtonOnClick(month));
+    $("#add-year").click(() => addButtonOnClick(year));
 
     $("#download-button").click(downloadJSON);
+    $("#file-input").change(function(){ $("#file-label").text(this.files[0].name) });
+    $("#open-button").click(() => openFile(false));
+    $("#merge-button").click(() => openFile(true));
 
-    function handleFiles()
+    $("#clear-button").click(() =>
     {
-      readURL(this)
-    }
+      if(confirm("This will clear all todos!"))
+      {
+        clearTodos();
+      }
+    });
 
-    $("#file-input").change(handleFiles);
-
-    var db = localStorage.getItem("twmy") || "[]"
-    db = JSON.parse(db);
-    db.sort((a, b) => a.time - b.time)
-    console.log(db);
-
-    //addTodo("foo", Date.now());
-    rebuildDivs();
+    loadTodos(JSON.parse(localStorage.getItem("twmy") || "[]"));
 
     setInterval(updateAllTimes, 1000);
 
