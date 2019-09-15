@@ -57,7 +57,7 @@
 
       <hr/>
 
-      <h4>Reschedule</h4>
+      <h4>Reschedule <span id="todo-count" class="text-light"></span></h4>
       <div id="todos" class="row">
       </div>
 
@@ -336,6 +336,8 @@
       localStorage.setItem("twmy", JSON.stringify(db));
       //rebuild divs
       rebuildDivs();
+      //update count
+      $("#todo-count").text(`(${db.length} todos)`);
     }
 
     $("#add-now").click(() => addButtonOnClick(0));
