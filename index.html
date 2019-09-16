@@ -48,16 +48,24 @@
         </div>
         <div class="col-sm-6">
           <button id="add-now" type="button" class="btn btn-outline-danger">Now!</button>
-          <button id="add-today" type="button" class="btn btn-outline-danger">T</button>
-          <button id="add-week" type="button" class="btn btn-outline-warning">W</button>
-          <button id="add-month" type="button" class="btn btn-outline-success">M</button>
+          <button id="add-today" type="button" class="btn btn-outline-warning">T</button>
+          <button id="add-week" type="button" class="btn btn-outline-success">W</button>
+          <button id="add-month" type="button" class="btn btn-outline-info">M</button>
           <button id="add-year" type="button" class="btn btn-outline-primary">Y</button>
         </div>
       </div>
 
       <hr/>
 
-      <h4>Reschedule <span id="todo-count" class="text-light"></span></h4>
+      <h4>
+        Schedule
+        <span id="total-count" class="text-light"></span>
+        <span id="overdue-count" class="text-danger"></span>
+        <span id="today-count" class="text-warning"></span>
+        <span id="week-count" class="text-info"></span>
+        <span id="month-count" class="text-success"></span>
+        <span id="year-count" class="text-primary"></span>
+      </h4>
       <div id="todos" class="row">
       </div>
 
@@ -125,6 +133,17 @@
       return parent;
     }
 
+    function todo2color(todo)
+    {
+      if(isTodoWithin(todo, 0)) { return "text-danger" }
+      if(isTodoWithin(todo, day)) { return "text-warning" }
+      if(isTodoWithin(todo, week)) { return "text-success" }
+      if(isTodoWithin(todo, month)) { return "text-info" }
+      if(isTodoWithin(todo, year)) { return "text-primary" }
+      //TODO: >1y?
+      return "text-success";
+    }
+
     function buildDiv(todo)
     {
       var col = $(`<div class="col-sm-12"/>`);
@@ -135,14 +154,15 @@
       nameLabel.text(todo.name);
 
       var timeLabel = $("<span></span>");
-      timeLabel.addClass("text-light");
+      //timeLabel.addClass("text-light");
+      timeLabel.addClass(todo2color(todo));
       timeLabel.text(formatTime(todo.time));
 
       //var doneButton = $('<button/>',
       var nowButton = timeButton(todo, "Now!", 0, "danger");
-      var dayButton = timeButton(todo, "T", day, "danger");
-      var weekButton = timeButton(todo, "W", week, "warning");
-      var monthButton = timeButton(todo, "M", month, "success");
+      var dayButton = timeButton(todo, "T", day, "warning");
+      var weekButton = timeButton(todo, "W", week, "success");
+      var monthButton = timeButton(todo, "M", month, "info");
       var yearButton = timeButton(todo, "Y", year, "primary");
 
       row.append(wrapCol(3, nameLabel))
@@ -328,6 +348,11 @@
       update();
     }
 
+    function isTodoWithin(todo, time)
+    {
+      return todo.time - Date.now() < time;
+    }
+
     function update()
     {
       //sort
@@ -337,7 +362,14 @@
       //rebuild divs
       rebuildDivs();
       //update count
-      $("#todo-count").text(`(${db.length} todos)`);
+      //TODO: what about < 1y?
+      var counts = [0, day, week, month, year].map((e) => db.filter((a) => isTodoWithin(a, e)).length)
+      $("#total-count").text(`(${db.length} total)`);
+      $("#overdue-count").text(`(${counts[0]} overdue)`);
+      $("#today-count").text(`(${counts[1]} today)`);
+      $("#week-count").text(`(${counts[2]} this week)`);
+      $("#month-count").text(`(${counts[3]} this month)`);
+      $("#year-count").text(`(${counts[4]} this year)`);
     }
 
     $("#add-now").click(() => addButtonOnClick(0));
@@ -351,6 +383,17 @@
     $("#open-button").click(() => openFile(false));
     $("#merge-button").click(() => openFile(true));
 
+    //enter listener
+    //TODO: document?
+    $('#todo-name').keypress(function(event)
+    {
+      var keycode = (event.keyCode ? event.keyCode : event.which);
+      if(keycode == '13')
+      {
+        addButtonOnClick(0);
+      }
+    });
+
     $("#clear-button").click(() =>
     {
       if(confirm("This will clear all todos!"))
@@ -362,6 +405,8 @@
     loadTodos(JSON.parse(localStorage.getItem("twmy") || "[]"));
 
     setInterval(updateAllTimes, 1000);
+
+    $('#todo-name').focus();
 
     </script>
   </body>
