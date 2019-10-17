@@ -278,7 +278,7 @@
       var uriContent = "data:application/json," + encodeURIComponent(JSON.stringify(db, null, 2));
 
       var link = document.createElement("a");
-      link.download = "twmy-" + Date.now();
+      link.download = "twmy-" + Date.now() + ".json";
       link.href = uriContent;
       link.click();
     }
