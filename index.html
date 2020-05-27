@@ -48,6 +48,7 @@
         </div>
         <div class="col-sm-6">
           <button id="add-now" type="button" class="btn btn-outline-danger">Now!</button>
+          <button id="add-hour" type="button" class="btn btn-outline-warning">H</button>
           <button id="add-today" type="button" class="btn btn-outline-warning">T</button>
           <button id="add-week" type="button" class="btn btn-outline-success">W</button>
           <button id="add-month" type="button" class="btn btn-outline-info">M</button>
@@ -74,13 +75,12 @@
       <h4>What is this?</h4>
       I needed an organizational tool that was more than a <em>todo list</em>,
       but not quite a <em>calendar</em>; so I made this.
-      It stores a list of tasks with simple due dates: finish within 24h (Today),
-      finish within 7 days (Week), finish within 30 days (Month),
-      and finish within 365 days (Year).
+      It stores a list of tasks with simple due dates: finish within 1 Hour, Today (24 hours),
+      Week (7 days), Month (30 days), or Year (365 days).
       <br/><br/>
       Once tasks count down to 0, they become "overdue". Tasks can be rescheduled
-      at any time -- clicking T/W/M/Y under reschedule will simply set their due date
-      to one day/week/month/year from now. This should work well for repeating tasks
+      at any time -- clicking H/T/W/M/Y under reschedule will simply set their due date
+      to one hour/day/week/month/year from now. This should work well for repeating tasks
       like "Get groceries".
       <br/><br/>
       No todo data is sent or received to/from the server. Data is stored in your browser's <code>localStorage</code>, and data can be saved/loaded to/from JSON.
@@ -89,10 +89,11 @@
     </div>
 
     <script>
-    var day = 1000 * 60 * 60 * 24
-    var week = day * 7
-    var month = day * 30
-    var year = day * 365
+    var hour = 1000 * 60 * 60;
+    var day = hour * 24;
+    var week = day * 7;
+    var month = day * 30;
+    var year = day * 365;
 
     var updateFuncs = [];
 
@@ -160,6 +161,7 @@
 
       //var doneButton = $('<button/>',
       var nowButton = timeButton(todo, "Now!", 0, "danger");
+      var hourButton = timeButton(todo, "H", hour, "warning");
       var dayButton = timeButton(todo, "T", day, "warning");
       var weekButton = timeButton(todo, "W", week, "success");
       var monthButton = timeButton(todo, "M", month, "info");
@@ -170,6 +172,7 @@
 
       var col2 = $(`<div class="col-sm-6 mb-3"/>`);
       col2.append(nowButton)
+      col2.append(hourButton)
       col2.append(dayButton)
       col2.append(weekButton)
       col2.append(monthButton)
